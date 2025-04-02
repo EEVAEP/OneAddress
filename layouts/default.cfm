@@ -44,7 +44,9 @@
 
             #body#
         </cfoutput>
-
+        <footer class="text-white text-center ">
+        <p>&copy; 2025 Address Book. All Rights Reserved.</p>
+    </footer>
 		<script src="/OneAddress/assets/js/bootstrap.bundle.min.js"></script>
 		<script src="/OneAddress/assets/js/default.js"></script>
 		<script src="/OneAddress/assets/js/login.js"></script>

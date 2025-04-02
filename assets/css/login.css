@@ -47,3 +47,10 @@
     .logoLarge {
         width: 70px;
     }
+
+    footer {
+        background: linear-gradient(90deg, #337ab7,#0a3357);
+        padding: 60px;
+        margin-top: 120px;
+        
+    }

@@ -19,6 +19,33 @@ component accessors=true {
         
     }
 
+    function signup(struct rc) {
+        param name="rc.signupMsg" default="";
+        param name="rc.fullname" default="";
+        param name="rc.email" default="";
+        param name="rc.username" default="";
+        param name="rc.password" default="";
+        param name="rc.confirmpassword" default="";
+
+       
+        if(structKeyExists(rc, "submitBtn")) {
+            local.signupResult = variables.addressbookService.signup(
+                fullname = rc.fullname,
+                email = rc.email,
+                username = rc.username,
+                password = rc.password
+            );
+
+            if (local.signupResult.success) {
+                rc.signupMsg = "Signup successfull. <a href='#variables.fw.buildURL('main.login')#'>Login</a> to continue.";
+            }
+            else {
+                rc.signupMsg = local.signupResult.message;
+            }
+        }
+        
+    }
+
     function login(struct rc) {
         param name="rc.loginMsg" default="";
         param name="rc.username" default="";

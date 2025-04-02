@@ -8,6 +8,58 @@
 		<cfreturn local.hashedPass>
 	</cffunction>
 
+
+     <cffunction name="signup" returnType="struct" access="public">
+        <cfargument required="true" name="fullName" type="string">
+        <cfargument required="true" name="email" type="string">
+        <cfargument required="true" name="userName" type="string">
+        <cfargument required="true" name="password" type="string">
+
+       
+        <cfset local.response = {
+            "success" = false,
+            "message" = ""
+        }>
+
+       <cfquery name="local.checkUsernameAndEmail" datasource="addressbook">
+            SELECT
+				username
+			FROM
+				register
+			WHERE
+				username = <cfqueryparam value = "#arguments.userName#" cfsqltype = "cf_sql_varchar">
+				OR email = <cfqueryparam value = "#arguments.email#" cfsqltype = "cf_sql_varchar">
+        </cfquery>
+
+		<cfif local.checkUsernameAndEmail.RecordCount>
+            <cfset local.response.message = "Email or Username already exists!">
+		<cfelse>
+            <cfset local.salt = generateSecretKey("AES")>
+            <cfset local.hashedPassword = hashPassword(arguments.password, local.salt)>
+
+            <cfquery name="local.addUser" datasource="addressbook">
+                INSERT INTO
+					register (
+						fullname,
+						email,
+						username,
+						password,
+						salt
+					)
+				VALUES (
+					<cfqueryparam value = "#arguments.fullName#" cfsqltype = "cf_sql_varchar">,
+					<cfqueryparam value = "#arguments.email#" cfsqltype = "cf_sql_varchar">,
+					<cfqueryparam value = "#arguments.userName#" cfsqltype = "cf_sql_varchar">,
+					<cfqueryparam value = "#local.hashedPassword#" cfsqltype = "cf_sql_char">,
+					<cfqueryparam value = "#local.salt#" cfsqltype = "cf_sql_varchar">
+				)
+            </cfquery>
+            <cfset local.response.success = true>
+        </cfif>
+
+        <cfreturn local.response>
+    </cffunction>
+
     <cffunction name="login" returnType="struct" access="public">
         <cfargument required="true" name="userName" type="string">
         <cfargument required="true" name="password" type="string">
