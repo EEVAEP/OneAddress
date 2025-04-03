@@ -434,7 +434,6 @@
             "message" = ""
         }>
         <cfquery name="local.deleteContactQuery" datasource="addressbook">
-            
            DELETE
             FROM
                 contact
