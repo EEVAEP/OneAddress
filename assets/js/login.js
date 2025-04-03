@@ -19,6 +19,5 @@ $("#username, #password").on("input", function () {
 });
 
 $(document).ready(function(){
-	// Enable custom tooltip styling using bootstrap
 	$('[data-bs-toggle="tooltip"]').tooltip();
 });

@@ -1,7 +1,7 @@
 <cfoutput>
     <div class="container d-flex flex-column justify-content-center align-items-center py-5 mt-5">
-        <div id="submitMsgSection" class="p-2">#rc.signupMsg#</div>
-        <div class="row shadow-lg border-0 rounded-4 w-75">
+        <div id="submitMsgSection" class="text-danger p-2">#rc.signupMsg#</div>
+            <div class="row shadow-lg border-0 rounded-4 w-75">
                 <div class="leftSection col-md-4 d-flex align-items-center justify-content-center rounded-start-4">
                     <img class="logoLarge" src="/OneAddress/assets/img/addressbook.png" alt="Address Book Logo">
                 </div>
@@ -37,6 +37,7 @@
                         Already have an account? <a class="text-decoration-none" href="index.cfm">Login</a>
                     </div>
                 </div>
+            </div>
         </div>
     </div>
 </cfoutput>

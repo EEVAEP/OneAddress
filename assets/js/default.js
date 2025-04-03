@@ -82,7 +82,6 @@ function createContact() {
 	$("#contactManagementMsgSection").text("");
 	$("#editContactHobby").attr("defaultValue", []);
 	$('#contactManagementModal').modal('show');
-	$("#editContactPicture").attr("");
 }
 
 function editContact(event) {

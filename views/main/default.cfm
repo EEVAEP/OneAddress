@@ -8,7 +8,7 @@
                    
                     <img class="userProfileIcon rounded-4" src="/OneAddress/assets/img/user.png" alt="User Profile Icon">
                     
-                    <h4>Full Name</h4>
+                    <h4>#session.username#</h4>
                     <button class="btn bg-primary text-white rounded-pill d-print-none" onclick="createContact()">CREATE CONTACT</button>
                 </div>
             </div>
@@ -23,7 +23,7 @@
                                         <th></th>
                                         <th>NAME</th>
                                         <th>EMAIL ID</th>
-                                        <th>PHONE NUMBER</th>
+                                        <th>PHONE</th>
                                         <th class="d-print-none"></th>
                                         <th class="d-print-none"></th>
                                         <th class="d-print-none"></th>
@@ -135,8 +135,7 @@
             </div>
         </div>
     </div>
-
-    <!--- Create - Edit Contact Modal --->
+    
     <div class="modal fade" id="contactManagementModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content rounded-0 d-flex flex-row justify-content-around">

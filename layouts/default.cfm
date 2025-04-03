@@ -10,11 +10,8 @@
 		<script src="/OneAddress/assets/js/fontawesome.js"></script>
 		<script src="/OneAddress/assets/js/jquery.js"></script>
     </head>
-
     <body>
-
         <cfoutput>
-            <!--- Navbar --->
             <nav class="navbar navbar-expand-lg shadow-sm customNavbar px-2">
                 <div class="container-fluid">
                     <a class="navbar-brand text-white" href="/">

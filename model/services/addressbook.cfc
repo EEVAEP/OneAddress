@@ -1,5 +1,4 @@
 <cfcomponent displayname="addressbookComponent">
-
     <cffunction name="hashPassword" access="private">
 		<cfargument name="pass" type="string" required="true">
 		<cfargument name="salt" type="string" required="true">
@@ -8,18 +7,50 @@
 		<cfreturn local.hashedPass>
 	</cffunction>
 
-
-     <cffunction name="signup" returnType="struct" access="public">
+    <cffunction name="signup" returnType="struct" access="public">
         <cfargument required="true" name="fullName" type="string">
         <cfargument required="true" name="email" type="string">
         <cfargument required="true" name="userName" type="string">
         <cfargument required="true" name="password" type="string">
-
-       
+        <cfargument required="true" name="confirmpassword" type="string">
         <cfset local.response = {
             "success" = false,
-            "message" = ""
+            "message" = "",
+            "errors" = []
         }>
+        <cfif len(trim(arguments.fullName)) EQ 0>
+                <cfset arrayAppend(local.response.errors, "*Fullname is required")>
+        <cfelseif NOT reFindNoCase("^[A-Za-z]+(\s[A-Za-z]+)*$", arguments.fullName)>
+            <cfset arrayAppend(local.response.errors, "*Enter a valid fullname")>
+        </cfif>
+        
+        <cfif len(trim(arguments.email)) EQ 0>
+                <cfset arrayAppend(local.response.errors, "*Email is required")>
+        <cfelseif NOT reFindNoCase("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", arguments.email)>
+                <cfset arrayAppend(local.response.errors, "*Enter a valid email")>
+        </cfif>
+        
+        <cfif len(trim(arguments.userName)) EQ 0>
+                <cfset arrayAppend(local.response.errors, "*Please enter the username")>
+        <cfelseif NOT reFindNoCase("^[a-zA-Z_][a-zA-Z0-9_]{3,13}$", arguments.userName)>
+                <cfset arrayAppend(local.response.errors, "*Please enter a valid username")>
+        </cfif>
+        
+        <cfif len(trim(arguments.password)) EQ 0>
+                <cfset arrayAppend(local.response.errors, "*Please enter the password")>
+        <cfelseif NOT reFindNoCase("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$", arguments.password)>
+                <cfset arrayAppend(local.response.errors, "*Please enter a valid password (minimum 8 characters, 1 lowercase, 1 uppercase, 1 special character)")>
+        </cfif>
+
+        <cfif arrayLen(local.response.errors) GT 0>
+            <cfreturn local.response>
+        </cfif>
+    
+        <cfif len(trim(arguments.confirmPassword)) EQ 0>
+            <cfset arrayAppend(local.response.errors, "*Password confirmation is required")>
+        <cfelseif arguments.confirmPassword NEQ arguments.password>
+                <cfset arrayAppend(local.response.errors, "*Password confirmation does not match the password")>
+        </cfif>
 
        <cfquery name="local.checkUsernameAndEmail" datasource="addressbook">
             SELECT
@@ -30,9 +61,9 @@
 				username = <cfqueryparam value = "#arguments.userName#" cfsqltype = "cf_sql_varchar">
 				OR email = <cfqueryparam value = "#arguments.email#" cfsqltype = "cf_sql_varchar">
         </cfquery>
-
-		<cfif local.checkUsernameAndEmail.RecordCount>
+        <cfif local.checkUsernameAndEmail.RecordCount>
             <cfset local.response.message = "Email or Username already exists!">
+            <cfreturn local.response>
 		<cfelse>
             <cfset local.salt = generateSecretKey("AES")>
             <cfset local.hashedPassword = hashPassword(arguments.password, local.salt)>
@@ -55,20 +86,17 @@
 				)
             </cfquery>
             <cfset local.response.success = true>
+            <cfreturn local.response>
         </cfif>
-
-        <cfreturn local.response>
     </cffunction>
 
     <cffunction name="login" returnType="struct" access="public">
         <cfargument required="true" name="userName" type="string">
         <cfargument required="true" name="password" type="string">
-       
         <cfset local.response = {
             "success" = false,
             "message" = ""
         }>
-
         <cftry>
             <cfquery name="local.getUserDetails" datasource="addressbook">
                 SELECT
@@ -85,6 +113,7 @@
             </cfquery>
             <cfif local.getUserDetails.RecordCount EQ 0>
                 <cfset local.response.message = "Wrong username or password!">
+                <cfreturn local.response>
             <cfelse>
                 <cfset local.salt = local.getUserDetails.salt>
 			    <cfset local.hashedPassword  = hashPassword(arguments.password, local.salt)>
@@ -94,15 +123,13 @@
                     <cfset session.userId = local.getUserDetails.id>
                     <cfset session.username = local.getUserDetails.username>
                 </cfif>
+                <cfset local.response.success = true>
+                <cfreturn local.response>
             </cfif>
-
             <cfcatch type="any">
                 <cfreturn local.response>
             </cfcatch>
         </cftry>
-
-        <cfset local.response.success = true>
-        <cfreturn local.response>
     </cffunction>
 
     <cffunction name="fetchContacts" access="public" returntype="struct"> 
@@ -112,7 +139,6 @@
             "success" = true,
             "data" = []
         }>
-
         <cftry>
             <cfquery name="local.qryGetContacts" datasource="addressbook">
                 <cfif val(arguments.contactId) EQ 0>
@@ -127,7 +153,6 @@
                         contact
                     WHERE
                         iduser = <cfqueryparam value="#session.userId#" cfsqltype="cf_sql_integer">
-                        
                 <cfelse>
                    SELECT
                         cd.idcontact,
@@ -167,7 +192,6 @@
                         cd.phone
                 </cfif>
             </cfquery>
-            
             <cfloop query="local.qryGetContacts">
                 <cfif val(arguments.contactId) EQ 0>
                     
@@ -180,7 +204,6 @@
                         "phone" = local.qryGetContacts.phone
                     })>
                 <cfelse>
-                    
                     <cfset arrayAppend(local.response.data, {
                         "contactid" = local.qryGetContacts.idcontact,
                         "title" = local.qryGetContacts.titlename,
@@ -198,15 +221,12 @@
                         "hobbyNames" = local.qryGetContacts.hobby_names
                     })>
                 </cfif>
-                
             </cfloop>
-            
             <cfcatch type="any">
                 <cfset local.response.success = false>
                 <cfreturn local.response>
             </cfcatch>
         </cftry>
-        
         <cfreturn local.response>
     </cffunction>
 
@@ -215,7 +235,6 @@
             "success" = true,
             "data" = []
         }>
-
         <cftry>
             <cfquery name="local.qryGetHobbies" datasource="addressbook">
                 SELECT
@@ -231,16 +250,13 @@
                     "hobbyName" = local.qryGetHobbies.hobby_name
                 })>
             </cfloop>
-
             <cfcatch type="any">
                 <cfset local.response.success = false>
                 <cfreturn local.response>
             </cfcatch>
         </cftry>
-        
         <cfreturn local.response>
     </cffunction>
-
 
     <cffunction name="modifyContacts" returnType="struct" access="public">
         <cfargument required="false" name="contactId" type="string">
@@ -257,13 +273,11 @@
         <cfargument required="true" name="contactPhone" type="string">
         <cfargument required="true" name="hobbyIdsToInsert" type="string">
         <cfargument required="true" name="hobbyIdsToDelete" type="string">
-        
         <cfset local.response = {
             "success" = false,
             "message" = ""
         }>
         <cfset local.contactImage = "demo-contact-image.jpg">
-
         <cfquery name="local.getEmailPhoneQuery" datasource="addressbook">
             SELECT
                 idcontact
@@ -273,7 +287,6 @@
                 iduser = <cfqueryparam value = "#session.userId#" cfsqltype = "cf_sql_integer">
                 AND email = <cfqueryparam value = "#arguments.contactEmail#" cfsqltype = "cf_sql_varchar">
         </cfquery>
-
         <cfquery name="local.getTitleIdQuery" datasource="addressbook">
             SELECT
                 idtitle
@@ -283,7 +296,6 @@
                 titlename = <cfqueryparam value = "#arguments.contactTitle#" cfsqltype = "cf_sql_varchar">
         </cfquery>
         <cfset local.titleId = local.getTitleIdQuery.idtitle>
-
         <cfquery name="local.getGenderIdQuery" datasource="addressbook">
             SELECT
                 idgender
@@ -410,7 +422,6 @@
                 <cfset local.response["message"] = "Success">
             </cfif>
         </cfif>
-
         <cfreturn local.response>
     </cffunction>
 
@@ -422,7 +433,6 @@
             "success" = false,
             "message" = ""
         }>
-
         <cfquery name="local.deleteContactQuery" datasource="addressbook">
             
            DELETE
